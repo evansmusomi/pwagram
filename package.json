@@ -1,0 +1,20 @@
+{
+  "name": "pwagram",
+  "version": "1.0.0",
+  "description": "Building a simple PWA Instagram clone.",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server -c-1"
+  },
+  "keywords": [
+    "pwa",
+    "progressive",
+    "web",
+    "app"
+  ],
+  "author": "Musomi",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.10.0"
+  }
+}

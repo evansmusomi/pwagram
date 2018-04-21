@@ -1,6 +1,11 @@
 // Globals
 var deferredPrompt;
 
+// Polyfills
+if (!window.Promise) {
+  window.Promise = Promise;
+}
+
 // Register SW
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").then(() => {

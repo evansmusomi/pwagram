@@ -1,4 +1,5 @@
-const cacheVersion = "v1";
+const staticCacheName = "static-v1.0";
+const dynamicCacheName = "dynamic-v1.0";
 const staticAssets = [
   "/",
   "/index.html",
@@ -18,7 +19,7 @@ const staticAssets = [
 self.addEventListener("install", event => {
   console.log("[SW] Installing");
   event.waitUntil(
-    caches.open(`static-${cacheVersion}`).then(cache => {
+    caches.open(staticCacheName).then(cache => {
       console.log("[SW] Pre-caching App shell");
       cache.addAll(staticAssets);
     })
@@ -27,20 +28,33 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   console.log("[SW] Activating");
+  event.waitUntil(
+    caches.keys().then(keyList => {
+      return Promise.all(
+        keyList.map(key => {
+          if (key !== staticCacheName && key !== dynamicCacheName) {
+            console.log("[SW] Removing old cache");
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
 });
 
 self.addEventListener("fetch", event => {
-  console.log("[SW] Fetching...", event.request.url);
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) return response;
 
-      return fetch(event.request).then(res => {
-        return caches.open(`dynamic-${cacheVersion}`).then(cache => {
-          cache.put(event.request.url, res.clone());
-          return res;
-        });
-      });
+      return fetch(event.request)
+        .then(res => {
+          return caches.open(dynamicCacheName).then(cache => {
+            cache.put(event.request.url, res.clone());
+            return res;
+          });
+        })
+        .catch(err => console.log(err));
     })
   );
 });

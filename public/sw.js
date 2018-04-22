@@ -1,4 +1,4 @@
-const staticCache = "static-v1";
+const cacheVersion = "v1";
 const staticAssets = [
   "/",
   "/index.html",
@@ -18,7 +18,7 @@ const staticAssets = [
 self.addEventListener("install", event => {
   console.log("[SW] Installing");
   event.waitUntil(
-    caches.open(staticCache).then(cache => {
+    caches.open(`static-${cacheVersion}`).then(cache => {
       console.log("[SW] Pre-caching App shell");
       cache.addAll(staticAssets);
     })
@@ -34,7 +34,13 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) return response;
-      return fetch(event.request);
+
+      return fetch(event.request).then(res => {
+        return caches.open(`dynamic-${cacheVersion}`).then(cache => {
+          cache.put(event.request.url, res.clone());
+          return res;
+        });
+      });
     })
   );
 });

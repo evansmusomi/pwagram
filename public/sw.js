@@ -1,8 +1,9 @@
-const staticCacheName = "static-v1.1";
+const staticCacheName = "static-v1.2";
 const dynamicCacheName = "dynamic-v1.1";
 const staticAssets = [
   "/",
   "/index.html",
+  "/offline.html",
   "/src/js/app.js",
   "/src/js/feed.js",
   "/src/js/promise.js",
@@ -54,7 +55,11 @@ self.addEventListener("fetch", event => {
             return res;
           });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          return caches.open(staticCacheName).then(cache => {
+            return cache.match("/offline.html");
+          });
+        });
     })
   );
 });

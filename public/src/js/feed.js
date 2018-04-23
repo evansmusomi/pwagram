@@ -33,6 +33,12 @@ function closeCreatePostModal() {
 shareImageButton.addEventListener("click", openCreatePostModal);
 closeCreatePostModalButton.addEventListener("click", closeCreatePostModal);
 
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
 function createCard() {
   let cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
@@ -63,5 +69,6 @@ function createCard() {
 fetch("https://httpbin.org/get")
   .then(response => response.json())
   .then(data => {
+    clearCards();
     createCard();
   });

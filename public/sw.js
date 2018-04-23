@@ -57,7 +57,9 @@ self.addEventListener("fetch", event => {
         })
         .catch(err => {
           return caches.open(staticCacheName).then(cache => {
-            return cache.match("/offline.html");
+            if (event.request.headers.get("accept").includes("text/html")) {
+              return cache.match("/offline.html");
+            }
           });
         });
     })

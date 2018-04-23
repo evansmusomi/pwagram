@@ -30,6 +30,16 @@ function closeCreatePostModal() {
   createPostArea.style.display = "none";
 }
 
+function onSaveButtonClicked(event) {
+  console.log("clicked");
+  if ("caches" in window) {
+    caches.open("user-cache").then(cache => {
+      cache.add("https://httpbin.org/get");
+      cache.add("/src/images/sf-boat.jpg");
+    });
+  }
+}
+
 shareImageButton.addEventListener("click", openCreatePostModal);
 closeCreatePostModalButton.addEventListener("click", closeCreatePostModal);
 
@@ -54,6 +64,11 @@ function createCard() {
   cardSupportingText.className = "mdl-card__supporting-text";
   cardSupportingText.textContent = "In San Francisco";
   cardSupportingText.style.textAlign = "center";
+
+  let cardSaveButton = document.createElement("button");
+  cardSaveButton.textContent = "Save";
+  cardSaveButton.addEventListener("click", onSaveButtonClicked);
+  cardSupportingText.appendChild(cardSaveButton);
   cardWrapper.appendChild(cardSupportingText);
 
   componentHandler.upgradeElement(cardWrapper);

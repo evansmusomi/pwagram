@@ -39,13 +39,13 @@ function clearCards() {
   }
 }
 
-function createCard() {
+function createCard(data) {
   let cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
 
   let cardTitle = document.createElement("div");
   cardTitle.className = "mdl-card__title";
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = "cover";
   cardTitle.style.height = "180px";
   cardWrapper.appendChild(cardTitle);
@@ -53,12 +53,12 @@ function createCard() {
   let cardTitleTextElement = document.createElement("h2");
   cardTitleTextElement.style.color = "white";
   cardTitleTextElement.className = "mdl-card__title-text";
-  cardTitleTextElement.textContent = "San Francisco Trip";
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
 
   let cardSupportingText = document.createElement("div");
   cardSupportingText.className = "mdl-card__supporting-text";
-  cardSupportingText.textContent = "In San Francisco";
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = "center";
   cardWrapper.appendChild(cardSupportingText);
 
@@ -66,9 +66,18 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch("https://httpbin.org/get")
+function updateUI(data) {
+  clearCards();
+  data.forEach(item => {
+    createCard(item);
+  });
+}
+
+fetch("https://pwagramapp.firebaseio.com/posts.json")
   .then(response => response.json())
   .then(data => {
-    clearCards();
-    createCard();
+    let dataArray = Object.keys(data).map(key => {
+      return data[key];
+    });
+    updateUI(dataArray);
   });

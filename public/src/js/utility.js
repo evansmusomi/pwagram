@@ -21,3 +21,23 @@ function readAllData(idbStore) {
     return store.getAll();
   });
 }
+
+function clearAllData(idbStore) {
+  return dbPromise.then(db => {
+    let tx = db.transaction(idbStore, "readwrite");
+    let store = tx.objectStore(idbStore);
+    store.clear();
+    return tx.complete;
+  });
+}
+
+function deleteItemFromData(idbStore, id) {
+  return dbPromise
+    .then(db => {
+      let tx = db.transaction(idbStore, "readwrite");
+      let store = tx.objectStore(idbStore);
+      store.delete(id);
+      return tx.complete;
+    })
+    .then(() => console.log("Item deleted"));
+}

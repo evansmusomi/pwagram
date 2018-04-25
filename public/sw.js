@@ -73,11 +73,15 @@ function indexedDBWithNetworkFallback(event) {
   return event.respondWith(
     fetch(event.request).then(response => {
       let clonedResponse = response.clone();
-      clonedResponse.json().then(data => {
-        for (let key in data) {
-          writeData("posts", data[key]);
-        }
-      });
+      clearAllData("posts")
+        .then(() => {
+          return clonedResponse.json();
+        })
+        .then(data => {
+          for (let key in data) {
+            writeData("posts", data[key]);
+          }
+        });
       return response;
     })
   );

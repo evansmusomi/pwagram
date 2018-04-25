@@ -1,7 +1,7 @@
-// import idb script
+// Import idb script
 importScripts("/src/js/idb.js");
 
-// declare constants
+// Declare constants
 const staticCacheName = "static-v1.0";
 const dynamicCacheName = "dynamic-v1.0";
 const staticAssets = [
@@ -22,14 +22,14 @@ const staticAssets = [
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css"
 ];
 
-// define db handler
+// Define db handler
 const dbPromise = idb.open("posts-store", 1, db => {
   if (!db.objectStoreNames.contains("posts")) {
     db.createObjectStore("posts", { keyPath: "id" });
   }
 });
 
-// helper functions
+// Helper functions
 function trimCache(cacheName, maxItems) {
   caches.open(cacheName).then(cache => {
     cache.keys().then(keys => {
@@ -50,7 +50,51 @@ function isInArray(string, array) {
   return false;
 }
 
-// event listeners
+function cacheWithNetworkFallback(event) {
+  // Cache with network fallback
+  return event.respondWith(
+    caches.match(event.request).then(response => {
+      if (response) return response;
+
+      return fetch(event.request)
+        .then(res => {
+          return caches.open(dynamicCacheName).then(cache => {
+            cache.put(event.request.url, res.clone());
+            return res;
+          });
+        })
+        .catch(err => {
+          return caches.open(staticCacheName).then(cache => {
+            if (event.request.headers.get("accept").includes("text/html")) {
+              return cache.match("/offline.html");
+            }
+          });
+        });
+    })
+  );
+}
+
+function indexedDBWithNetworkFallback(event) {
+  // IndexedDB with Network Fallback
+  return event.respondWith(
+    fetch(event.request).then(response => {
+      let clonedResponse = response.clone();
+      clonedResponse.json().then(data => {
+        for (let key in data) {
+          dbPromise.then(db => {
+            let tx = db.transaction("posts", "readwrite");
+            let store = tx.objectStore("posts");
+            store.put(data[key]);
+            return tx.complete;
+          });
+        }
+      });
+      return response;
+    })
+  );
+}
+
+// Event listeners
 self.addEventListener("install", event => {
   console.log("[SW] Installing");
   event.waitUntil(
@@ -78,37 +122,16 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const apiUrl = "https://pwagramapp.firebaseio.com/posts";
+  const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
 
-  if (
-    event.request.url.indexOf(apiUrl) > -1 &&
-    event.request.headers.get("accept").includes("application/json")
-  ) {
-    // cache to indexeddb
+  if (event.request.url.indexOf(apiUrl) > -1) {
+    // Use IndexedDB and Network
+    indexedDBWithNetworkFallback(event);
   } else if (isInArray(event.request.url, staticAssets)) {
-    // cache only
+    // Use Cache only
     event.respondWith(caches.match(event.request));
   } else {
-    // cache with network fallback
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        if (response) return response;
-
-        return fetch(event.request)
-          .then(res => {
-            return caches.open(dynamicCacheName).then(cache => {
-              cache.put(event.request.url, res.clone());
-              return res;
-            });
-          })
-          .catch(err => {
-            return caches.open(staticCacheName).then(cache => {
-              if (event.request.headers.get("accept").includes("text/html")) {
-                return cache.match("/offline.html");
-              }
-            });
-          });
-      })
-    );
+    // Use Cache and Network
+    cacheWithNetworkFallback(event);
   }
 });

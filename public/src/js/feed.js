@@ -73,11 +73,24 @@ function updateUI(data) {
   });
 }
 
-fetch("https://pwagramapp.firebaseio.com/posts.json")
+const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
+let networkDataReceived = false;
+
+fetch(apiUrl)
   .then(response => response.json())
   .then(data => {
-    let dataArray = Object.keys(data).map(key => {
-      return data[key];
-    });
+    networkDataReceived = true;
+    console.log("From web", data);
+    let dataArray = Object.keys(data).map(key => data[key]);
     updateUI(dataArray);
+  })
+  .catch(console.log);
+
+if ("indexedDB" in window) {
+  readAllData("posts").then(data => {
+    if (!networkDataReceived) {
+      console.log("From indexeddb", data);
+      updateUI(data);
+    }
   });
+}

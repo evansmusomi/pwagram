@@ -1,5 +1,6 @@
-// Import idb script
+// Imports
 importScripts("/src/js/idb.js");
+importScripts("/src/js/utility.js");
 
 // Declare constants
 const staticCacheName = "static-v1.0";
@@ -21,13 +22,6 @@ const staticAssets = [
   "https://fonts.googleapis.com/icon?family=Material+Icons",
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css"
 ];
-
-// Define db handler
-const dbPromise = idb.open("posts-store", 1, db => {
-  if (!db.objectStoreNames.contains("posts")) {
-    db.createObjectStore("posts", { keyPath: "id" });
-  }
-});
 
 // Helper functions
 function trimCache(cacheName, maxItems) {
@@ -81,12 +75,7 @@ function indexedDBWithNetworkFallback(event) {
       let clonedResponse = response.clone();
       clonedResponse.json().then(data => {
         for (let key in data) {
-          dbPromise.then(db => {
-            let tx = db.transaction("posts", "readwrite");
-            let store = tx.objectStore("posts");
-            store.put(data[key]);
-            return tx.complete;
-          });
+          writeData("posts", data[key]);
         }
       });
       return response;

@@ -3,7 +3,7 @@ importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
 // Declare constants
-const staticCacheName = "static-v1.0";
+const staticCacheName = "static-v1.1";
 const dynamicCacheName = "dynamic-v1.0";
 const staticAssets = [
   "/",

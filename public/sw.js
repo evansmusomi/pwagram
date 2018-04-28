@@ -3,7 +3,7 @@ importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
 // Declare constants
-const staticCacheName = "static-v1.1";
+const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
 const dynamicCacheName = "dynamic-v1.0";
 const staticAssets = [
   "/",
@@ -22,28 +22,9 @@ const staticAssets = [
   "https://fonts.googleapis.com/icon?family=Material+Icons",
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css"
 ];
+const staticCacheName = "static-v1.1";
 
 // Helper functions
-function trimCache(cacheName, maxItems) {
-  caches.open(cacheName).then(cache => {
-    cache.keys().then(keys => {
-      if (keys.length > maxItems) {
-        cache.delete(keys[0]).then(trimCache(cacheName, maxItems));
-      }
-    });
-  });
-}
-
-function isInArray(string, array) {
-  array.forEach((item, index) => {
-    if (item == string) {
-      return true;
-    }
-  });
-
-  return false;
-}
-
 function cacheWithNetworkFallback(event) {
   // Cache with network fallback
   return event.respondWith(
@@ -87,6 +68,26 @@ function indexedDBWithNetworkFallback(event) {
   );
 }
 
+function isInArray(string, array) {
+  array.forEach((item, index) => {
+    if (item == string) {
+      return true;
+    }
+  });
+
+  return false;
+}
+
+function trimCache(cacheName, maxItems) {
+  caches.open(cacheName).then(cache => {
+    cache.keys().then(keys => {
+      if (keys.length > maxItems) {
+        cache.delete(keys[0]).then(trimCache(cacheName, maxItems));
+      }
+    });
+  });
+}
+
 // Event listeners
 self.addEventListener("install", event => {
   console.log("[SW] Installing");
@@ -115,8 +116,6 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
-
   if (event.request.url.indexOf(apiUrl) > -1) {
     // Use IndexedDB and Network
     indexedDBWithNetworkFallback(event);
@@ -128,3 +127,36 @@ self.addEventListener("fetch", event => {
     cacheWithNetworkFallback(event);
   }
 });
+
+self.addEventListener("sync", event => {
+  console.log("[SW] Background syncing");
+  if(event.tag === "sync-new-posts"){
+    event.waitUntil(
+      readAllData("sync-posts")
+        .then(data => {
+          for(let item of data){
+            fetch(apiUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+              },
+              body: JSON.stringify({
+                id: item.id,
+                title: item.title,
+                location: item.location,
+                image: "https://firebasestorage.googleapis.com/v0/b/pwagramapp.appspot.com/o/sf-boat.jpg?alt=media"
+              })
+            }).then(response => {
+                console.log("Sent data", response);
+                if(response.ok){
+                  deleteItemFromData("sync-posts", item.id);
+                }
+            }).catch(error => {
+                console.log("Error while sending data", error);
+            });
+          }
+        })
+    );
+  }
+})

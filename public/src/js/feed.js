@@ -1,12 +1,18 @@
-const shareImageButton = document.querySelector("#share-image-button");
-const createPostArea = document.querySelector("#create-post");
+const apiUrl = {
+  postFetch: "https://pwagramapp.firebaseio.com/posts.json",
+  postSync: "https://us-central1-pwagramapp.cloudfunctions.net/storePostData"
+};
+let networkDataReceived = false;
+
 const closeCreatePostModalButton = document.querySelector(
   "#close-create-post-modal-btn"
 );
+const shareImageButton = document.querySelector("#share-image-button");
+const createPostArea = document.querySelector("#create-post");
 const sharedMomentsArea = document.querySelector("#shared-moments");
 const form = document.querySelector("form");
-const titleInput = document.querySelector("#title");
 const locationInput = document.querySelector("#location");
+const titleInput = document.querySelector("#title");
 
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";
@@ -76,10 +82,7 @@ function updateUI(data) {
   });
 }
 
-const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
-let networkDataReceived = false;
-
-fetch(apiUrl)
+fetch(apiUrl.postFetch)
   .then(response => response.json())
   .then(data => {
     networkDataReceived = true;
@@ -99,7 +102,7 @@ if ("indexedDB" in window) {
 }
 
 function sendData(){
-  fetch(apiUrl, {
+  fetch(apiUrl.postSync, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

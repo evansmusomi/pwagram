@@ -3,7 +3,10 @@ importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
 // Declare constants
-const apiUrl = "https://pwagramapp.firebaseio.com/posts.json";
+const apiUrl = {
+  postFetch: "https://pwagramapp.firebaseio.com/posts.json",
+  postSync: "https://us-central1-pwagramapp.cloudfunctions.net/storePostData"
+};
 const dynamicCacheName = "dynamic-v1.0";
 const staticAssets = [
   "/",
@@ -116,7 +119,7 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.url.indexOf(apiUrl) > -1) {
+  if (event.request.url.indexOf(apiUrl.postFetch) > -1) {
     // Use IndexedDB and Network
     indexedDBWithNetworkFallback(event);
   } else if (isInArray(event.request.url, staticAssets)) {
@@ -135,7 +138,7 @@ self.addEventListener("sync", event => {
       readAllData("sync-posts")
         .then(data => {
           for(let item of data){
-            fetch(apiUrl, {
+            fetch(apiUrl.postSync, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -150,7 +153,9 @@ self.addEventListener("sync", event => {
             }).then(response => {
                 console.log("Sent data", response);
                 if(response.ok){
-                  deleteItemFromData("sync-posts", item.id);
+                  response.json().then(responseData => {
+                    deleteItemFromData("sync-posts", responseData.id);  
+                  });
                 }
             }).catch(error => {
                 console.log("Error while sending data", error);

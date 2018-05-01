@@ -39,7 +39,7 @@
   "orientation": "portrait-primary",
   "background_color": "#fff",
   "theme_color": "#3f51b5",
-  "description": "A  simple PWA Instagram Clone",
+  "description": "A simple PWA Instagram Clone",
   "dir": "ltr",
   "lang": "en-US"
 }

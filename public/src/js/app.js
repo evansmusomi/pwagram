@@ -26,7 +26,19 @@ window.addEventListener("beforeinstallprompt", event => {
 function displayConfirmNotification(){
   if ("serviceWorker" in navigator){
     let options = {
-      body: "You successfully subscribed to our service"
+      body: "You successfully subscribed to our service",
+      icon: "/src/images/icons/app-icon-96x96.png",
+      image: "/src/images/sf-boat.jpg",
+      dir: "ltr",
+      lang: "en-US",
+      vibrate: [100,50,200],
+      badge: "/src/images/icons/app-icon-96x96.png",
+      tag: "confirm-notification",
+      renotify: true,
+      actions: [
+        { action: "confirm", title: "Ok", icon: "/src/images/icons/app-icon-96x96.png" },
+        { action: "cancel", title: "Cancel", icon: "/src/images/icons/app-icon-96x96.png" }
+      ]
     };
     
     navigator.serviceWorker.ready.then(swRegistration => {

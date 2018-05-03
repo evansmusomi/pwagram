@@ -59,7 +59,7 @@ function configurePushSubscription(){
   }).then(subscription => {
     if(subscription === null){
       // create a new subscription
-      let vapidPublicKey = "BIu6jBHCMIujAAcizZT_KypQABl7h3D46EQUsj_pPRPsF7Ha0E4t50A7d-oMqprM5GwvQXSQMBHpWcy4MDZGrF0";
+      let vapidPublicKey = "BA-2FoWistRZCH8KTWRAYmJbIoNpbgxkIRG_RYVRy_FvdmtrsqT_s19vV95uhGOsXmXHAj5Yax4e4HIvnwB5POY";
       let applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
       
       return registration.pushManager.subscribe({

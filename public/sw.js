@@ -25,7 +25,7 @@ const staticAssets = [
   "https://fonts.googleapis.com/icon?family=Material+Icons",
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css"
 ];
-const staticCacheName = "static-v1.0";
+const staticCacheName = "static-v1.2";
 
 // Helper functions
 function cacheWithNetworkFallback(event) {

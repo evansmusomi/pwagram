@@ -26,16 +26,26 @@ function initializeMedia(){
   }
   
   if (!('getUserMedia') in navigator.mediaDevices){
-    let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    navigator.mediaDevices.getUserMedia = constraints => {
+      let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     
-    if (!getUserMedia){
-      return Promise.reject(new Error("getUserMedia is not implemented!"));
+      if (!getUserMedia){
+        return Promise.reject(new Error("getUserMedia is not implemented!"));
+      }
+      
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      }); 
     }
-    
-    return new Promise((resolve, reject) => {
-      getUserMedia.call(navigator, constraints, resolve, reject);
-    });
   }
+  
+  navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+    videoPlayer.srcObject = stream;
+    videoPlayer.style.display = "block";
+  }).catch(error => {
+    imagePickerArea.style.display = "block";
+  })
+  
 }
 
 function openCreatePostModal() {
@@ -62,6 +72,9 @@ function openCreatePostModal() {
 
 function closeCreatePostModal() {
   createPostArea.style.transform = "translateY(100vh)";
+  videoPlayer.style.display = "none";
+  imagePickerArea.style.display = "none";
+  canvasElement.style.display = "none";
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);

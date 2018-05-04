@@ -44,9 +44,19 @@ function initializeMedia(){
     videoPlayer.style.display = "block";
   }).catch(error => {
     imagePickerArea.style.display = "block";
-  })
-  
+  });
 }
+
+captureButton.addEventListener("click", event => {
+  canvasElement.style.display = "block";
+  videoPlayer.style.display = "none";
+  captureButton.style.display = "none";
+  let context = canvasElement.getContext("2d");
+  context.drawImage(videoPlayer, 0, 0, canvasElement.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width));
+  videoPlayer.srcObject.getVideoTracks().forEach(track => {
+    track.stop();
+  });
+});
 
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";

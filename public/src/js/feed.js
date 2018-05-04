@@ -13,9 +13,34 @@ const sharedMomentsArea = document.querySelector("#shared-moments");
 const form = document.querySelector("form");
 const locationInput = document.querySelector("#location");
 const titleInput = document.querySelector("#title");
+const videoPlayer = document.querySelector("#player");
+const canvasElement = document.querySelector("#canvas");
+const captureButton = document.querySelector("#capture-btn");
+const imagePicker = document.querySelector("#image-picker");
+const imagePickerArea = document.querySelector("#pick-image");
+
+
+function initializeMedia(){
+  if (!('mediaDevices') in navigator){
+    navigator.mediaDevices = {};
+  }
+  
+  if (!('getUserMedia') in navigator.mediaDevices){
+    let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    
+    if (!getUserMedia){
+      return Promise.reject(new Error("getUserMedia is not implemented!"));
+    }
+    
+    return new Promise((resolve, reject) => {
+      getUserMedia.call(navigator, constraints, resolve, reject);
+    });
+  }
+}
 
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";
+  initializeMedia();
 
   // Show deferred install prompt
   if (deferredPrompt) {

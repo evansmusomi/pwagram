@@ -18,7 +18,7 @@ const canvasElement = document.querySelector("#canvas");
 const captureButton = document.querySelector("#capture-btn");
 const imagePicker = document.querySelector("#image-picker");
 const imagePickerArea = document.querySelector("#pick-image");
-
+let picture;
 
 function initializeMedia(){
   if (!('mediaDevices') in navigator){
@@ -56,6 +56,7 @@ captureButton.addEventListener("click", event => {
   videoPlayer.srcObject.getVideoTracks().forEach(track => {
     track.stop();
   });
+  picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
 function openCreatePostModal() {
@@ -150,18 +151,16 @@ if ("indexedDB" in window) {
 }
 
 function sendData(){
+  let postData = new FormData();
+  let postId = new Date().toISOString();
+  postData.append("id", postId);
+  postData.append("title", titleInput.value);
+  postData.append("location", locationInput.value);
+  postData.append("file", picture, `${postId}.png`);
+            
   fetch(apiUrl.postSync, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image: "https://firebasestorage.googleapis.com/v0/b/pwagramapp.appspot.com/o/sf-boat.jpg?alt=media"
-    })
+    body: postData
   }).then(response => {
       console.log("Sent data", response);
       updateUI(response);
@@ -183,8 +182,10 @@ form.addEventListener("submit", event => {
       let post = {
         id: new Date().toISOString(),
         title: titleInput.value,
-        location: locationInput.value
+        location: locationInput.value,
+        picture: picture
       };
+      
       writeData("sync-posts", post)
         .then(() => {
           return sw.sync.register("sync-new-posts");

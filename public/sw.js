@@ -138,18 +138,15 @@ self.addEventListener("sync", event => {
       readAllData("sync-posts")
         .then(data => {
           for(let item of data){
+            let postData = new FormData();
+            postData.append("id", item.id);
+            postData.append("title", item.title);
+            postData.append("location", item.location);
+            postData.append("file", item.picture, `${item.id}.png`);
+            
             fetch(apiUrl.postSync, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-              },
-              body: JSON.stringify({
-                id: item.id,
-                title: item.title,
-                location: item.location,
-                image: "https://firebasestorage.googleapis.com/v0/b/pwagramapp.appspot.com/o/sf-boat.jpg?alt=media"
-              })
+              body: postData
             }).then(response => {
                 console.log("Sent data", response);
                 if(response.ok){

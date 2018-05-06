@@ -7,7 +7,7 @@ const apiUrl = {
   postFetch: "https://pwagramapp.firebaseio.com/posts.json",
   postSync: "https://us-central1-pwagramapp.cloudfunctions.net/storePostData"
 };
-const dynamicCacheName = "dynamic-v1.2";
+const dynamicCacheName = "dynamic-v1.5";
 const staticAssets = [
   "/",
   "/index.html",
@@ -26,7 +26,7 @@ const staticAssets = [
   "https://fonts.googleapis.com/icon?family=Material+Icons",
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css"
 ];
-const staticCacheName = "static-v1.12";
+const staticCacheName = "static-v1.26";
 
 // Helper functions
 function cacheWithNetworkFallback(event) {

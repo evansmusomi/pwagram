@@ -1,6 +1,7 @@
 const apiUrl = {
   postFetch: "https://pwagramapp.firebaseio.com/posts.json",
-  postSync: "https://us-central1-pwagramapp.cloudfunctions.net/storePostData"
+  postSync: "https://us-central1-pwagramapp.cloudfunctions.net/storePostData",
+  getCity: "https://us-central1-pwagramapp.cloudfunctions.net/cityReverseGeocode"
 };
 let networkDataReceived = false;
 
@@ -21,11 +22,22 @@ const captureButton = document.querySelector("#capture-btn");
 const imagePicker = document.querySelector("#image-picker");
 const imagePickerArea = document.querySelector("#pick-image");
 let picture;
-let fetchedLocation;
+let fetchedLocation = { lat: 0, lng: 0};
 
+
+function reverseGeocodeCity(coordinates){
+  fetch(`${apiUrl.getCity}?rawLocationLat=${coordinates.latitude}&rawLocationLng=${coordinates.longitude}`)
+  .then(response => response.json())
+  .then(data => {
+    locationInput.value = data.city;
+  })
+  .catch(console.log);
+}
 
 locationButton.addEventListener("click", event => {
   if (!("geolocation" in navigator)){ return;}
+  let sawAlert = false;
+  
   locationButton.style.display = "none";
   locationLoader.style.display = "block";
   
@@ -34,16 +46,22 @@ locationButton.addEventListener("click", event => {
     locationLoader.style.display = "none";
     console.log(position);
     fetchedLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
-    locationInput.value = "Nairobi";
+    reverseGeocodeCity(position.coords);
     document.querySelector("#manual-location").classList.add("is-focused");
   }, error => {
     console.log(error);
     locationButton.style.display = "inline";
     locationLoader.style.display = "none";
-    alert("Couldn't fetch location, please enter manually!");
-    fetchedLocation = { lat: null, lng: null};
+  
+    if(!sawAlert){
+      alert("Couldn't fetch location, please enter manually!");
+      sawAlert = true;
+    }
+
+    fetchedLocation = { lat: 0, lng: 0};
   }, { timeout: 7000});
   
+  event.preventDefault();
 });
 
 function initializeLocation(){
@@ -82,9 +100,11 @@ function initializeMedia(){
 }
 
 function shutDownCamera(){
-  videoPlayer.srcObject.getVideoTracks().forEach(track => {
-    track.stop();
-  });
+  if (videoPlayer.srcObject){
+    videoPlayer.srcObject.getVideoTracks().forEach(track => {
+      track.stop();
+    }); 
+  }
 }
 
 captureButton.addEventListener("click", event => {
@@ -102,7 +122,9 @@ imagePicker.addEventListener("change", event => {
 });
 
 function openCreatePostModal() {
-  createPostArea.style.transform = "translateY(0)";
+  setTimeout(() => {
+    createPostArea.style.transform = "translateY(0)";
+  }, 1);
   initializeMedia();
   initializeLocation();
 
@@ -125,7 +147,10 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = "translateY(100vh)";
+  setTimeout(() => {
+    createPostArea.style.transform = "translateY(100vh)";  
+  }, 1);
+
   videoPlayer.style.display = "none";
   imagePickerArea.style.display = "none";
   canvasElement.style.display = "none";
@@ -212,8 +237,8 @@ function sendData(){
     method: "POST",
     body: postData
   }).then(response => {
-      console.log("Sent data", response);
-      updateUI(response);
+    console.log("Sent data", response);
+    updateUI(response);
   });
 }
 

@@ -10,11 +10,11 @@ const googleCloudConfig = {
     keyFilename: "pwagramapp-fb-key.json"
 };
 const googleCloudStorage = require("@google-cloud/storage")(googleCloudConfig);
+const cityReverseGeocoder = require("city-reverse-geocoder");
 const fs = require("fs");
 const os = require("os");
 const Busboy = require("busboy");
 const path = require("path");
-
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -99,4 +99,15 @@ exports.storePostData = functions.https.onRequest((request, response) => {
     // send upload bytes to busboy
     busboy.end(request.rawBody); 
   });
+});
+
+exports.cityReverseGeocode = functions.https.onRequest((request, response) => {
+    return cors(request, response, () => {
+        let decodedCity = [{ city: "Anonymous"}];
+        let { rawLocationLat, rawLocationLng } = request.query;
+    
+        decodedCity = cityReverseGeocoder(rawLocationLat, rawLocationLng)[0];
+        
+        return response.status(200).json({ message: "City Decoded", city: `${decodedCity.city}, ${decodedCity.country}` });
+    });
 });

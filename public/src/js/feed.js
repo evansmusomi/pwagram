@@ -7,6 +7,8 @@ let networkDataReceived = false;
 const closeCreatePostModalButton = document.querySelector(
   "#close-create-post-modal-btn"
 );
+const locationButton = document.querySelector("#location-btn");
+const locationLoader = document.querySelector("#location-loader");
 const shareImageButton = document.querySelector("#share-image-button");
 const createPostArea = document.querySelector("#create-post");
 const sharedMomentsArea = document.querySelector("#shared-moments");
@@ -19,6 +21,36 @@ const captureButton = document.querySelector("#capture-btn");
 const imagePicker = document.querySelector("#image-picker");
 const imagePickerArea = document.querySelector("#pick-image");
 let picture;
+let fetchedLocation;
+
+
+locationButton.addEventListener("click", event => {
+  if (!("geolocation" in navigator)){ return;}
+  locationButton.style.display = "none";
+  locationLoader.style.display = "block";
+  
+  navigator.geolocation.getCurrentPosition(position => {
+    locationButton.style.display = "inline";
+    locationLoader.style.display = "none";
+    console.log(position);
+    fetchedLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+    locationInput.value = "Nairobi";
+    document.querySelector("#manual-location").classList.add("is-focused");
+  }, error => {
+    console.log(error);
+    locationButton.style.display = "inline";
+    locationLoader.style.display = "none";
+    alert("Couldn't fetch location, please enter manually!");
+    fetchedLocation = { lat: null, lng: null};
+  }, { timeout: 7000});
+  
+});
+
+function initializeLocation(){
+  if (!('geolocation' in navigator)){
+    locationButton.style.display = "none";
+  }
+}
 
 function initializeMedia(){
   if (!('mediaDevices') in navigator){
@@ -39,11 +71,19 @@ function initializeMedia(){
     }
   }
   
+  captureButton.style.display = "block";
+  
   navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
     videoPlayer.srcObject = stream;
     videoPlayer.style.display = "block";
   }).catch(error => {
     imagePickerArea.style.display = "block";
+  });
+}
+
+function shutDownCamera(){
+  videoPlayer.srcObject.getVideoTracks().forEach(track => {
+    track.stop();
   });
 }
 
@@ -53,9 +93,7 @@ captureButton.addEventListener("click", event => {
   captureButton.style.display = "none";
   let context = canvasElement.getContext("2d");
   context.drawImage(videoPlayer, 0, 0, canvasElement.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvasElement.width));
-  videoPlayer.srcObject.getVideoTracks().forEach(track => {
-    track.stop();
-  });
+  shutDownCamera();
   picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
@@ -66,6 +104,7 @@ imagePicker.addEventListener("change", event => {
 function openCreatePostModal() {
   createPostArea.style.transform = "translateY(0)";
   initializeMedia();
+  initializeLocation();
 
   // Show deferred install prompt
   if (deferredPrompt) {
@@ -90,6 +129,9 @@ function closeCreatePostModal() {
   videoPlayer.style.display = "none";
   imagePickerArea.style.display = "none";
   canvasElement.style.display = "none";
+  locationButton.style.display = "inline";
+  locationLoader.style.display = "none";
+  shutDownCamera();
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
@@ -157,10 +199,14 @@ if ("indexedDB" in window) {
 function sendData(){
   let postData = new FormData();
   let postId = new Date().toISOString();
+  
   postData.append("id", postId);
   postData.append("title", titleInput.value);
   postData.append("location", locationInput.value);
+  postData.append("rawLocationLat", fetchedLocation.lat);
+  postData.append("rawLocationLng", fetchedLocation.lng);
   postData.append("file", picture, `${postId}.png`);
+  
             
   fetch(apiUrl.postSync, {
     method: "POST",
@@ -187,7 +233,8 @@ form.addEventListener("submit", event => {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
-        picture: picture
+        picture: picture,
+        rawLocation: fetchedLocation
       };
       
       writeData("sync-posts", post)

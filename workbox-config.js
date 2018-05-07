@@ -9,6 +9,7 @@ module.exports = {
   "globIgnores": [
     "../workbox-config.js",
     "sw.js",
+    "sw-base.js",
     "help/**"
   ]
 };

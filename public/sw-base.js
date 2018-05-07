@@ -45,5 +45,12 @@ workbox.routing.registerRoute("https://pwagramapp.firebaseio.com/posts.json", ar
     });
 });
 
+const htmlHandler = workbox.strategies.cacheFirst();
+workbox.routing.registerRoute(routeData => {
+    return (routeData.event.request.headers.get("accept").includes("text/html"));
+}, ({event}) => {
+    return htmlHandler.handle({event}).catch(() => caches.match("/offline.html"));
+});
+
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute([], {});

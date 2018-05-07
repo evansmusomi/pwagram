@@ -10,8 +10,10 @@ if (!window.Promise) {
 
 // Register SW
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js").then(() => {
-    console.log("Service worker registered");
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register("/service-worker.js").then(() => {
+      console.log("Service worker registered");
+    });
   });
 }
 

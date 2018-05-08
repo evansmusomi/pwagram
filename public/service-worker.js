@@ -131,3 +131,88 @@ workbox.precaching.precacheAndRoute([
     "revision": "0f282d64b0fb306daf12050e812d6a19"
   }
 ], {});
+
+self.addEventListener("sync", event => {
+  console.log("[SW] Background syncing");
+  if(event.tag === "sync-new-posts"){
+    event.waitUntil(
+      readAllData("sync-posts")
+        .then(data => {
+          for(let item of data){
+            let postData = new FormData();
+            postData.append("id", item.id);
+            postData.append("title", item.title);
+            postData.append("location", item.location);
+            postData.append("rawLocationLat", item.rawLocation.lat);
+            postData.append("rawLocationLng", item.rawLocation.lng);
+            postData.append("file", item.picture, `${item.id}.png`);
+            
+            fetch("https://us-central1-pwagramapp.cloudfunctions.net/storePostData", {
+              method: "POST",
+              body: postData
+            }).then(response => {
+                console.log("Sent data", response);
+                if(response.ok){
+                  response.json().then(responseData => {
+                    deleteItemFromData("sync-posts", responseData.id);  
+                  });
+                }
+            }).catch(error => {
+                console.log("Error while sending data", error);
+            });
+          }
+        })
+    );
+  }
+});
+
+self.addEventListener("notificationclick", event => {
+  let notification = event.notification;
+  let action = event.action;
+  
+  console.log(notification);
+  
+  if (action === "confirm"){
+    console.log("Confirm was chosen");
+  }else{
+    console.log(action);
+    event.waitUntil(
+      clients.matchAll().then(foundClients => {
+        let client = foundClients.find(foundClient => foundClient.visibilityState === "visible");
+        
+        if (client !== undefined){
+          client.navigate(notification.data.url);
+          client.focus();
+        }else{
+          clients.openWindow(notification.data.url);
+        }
+      })
+    );
+  }
+  
+  notification.close();
+});
+
+self.addEventListener("notificationclose", event => {
+  console.log("Notification was closed", event);
+});
+
+self.addEventListener("push", event => {
+  console.log("Push Notification received");
+  
+  let data = {title: "New!", content: "Something new happened!", openUrl: "/help"};
+  if (event.data){
+    data = JSON.parse(event.data.text());
+  }
+  
+  let options = {
+    body: data.content,
+    icon: "/src/images/icons/app-icon-96x96.png",
+    badge: "/src/images/icons/app-icon-96x96.png",
+    data: {
+      url: data.openUrl
+    }
+  };
+  
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});

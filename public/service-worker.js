@@ -64,7 +64,7 @@ workbox.precaching.precacheAndRoute([
   },
   {
     "url": "index.html",
-    "revision": "3a1f6d43b2b1f5f8399a1c0bcd02cf26"
+    "revision": "cd5f84d9d5b20f854d6b2b84cd3a1b54"
   },
   {
     "url": "manifest.json",
@@ -87,34 +87,6 @@ workbox.precaching.precacheAndRoute([
     "revision": "1c6d81b27c9d423bece9869b07a7bd73"
   },
   {
-    "url": "src/js/app.js",
-    "revision": "2cbf883cf819a9dc86a9ad7306c506cc"
-  },
-  {
-    "url": "src/js/feed.js",
-    "revision": "b573c48c16810bf983014238cee3d271"
-  },
-  {
-    "url": "src/js/fetch.js",
-    "revision": "6b82fbb55ae19be4935964ae8c338e92"
-  },
-  {
-    "url": "src/js/idb.js",
-    "revision": "017ced36d82bea1e08b08393361e354d"
-  },
-  {
-    "url": "src/js/material.min.js",
-    "revision": "713af0c6ce93dbbce2f00bf0a98d0541"
-  },
-  {
-    "url": "src/js/promise.js",
-    "revision": "10c2238dcd105eb23f703ee53067417f"
-  },
-  {
-    "url": "src/js/utility.js",
-    "revision": "0de3471f6cb82664e032c0afef5a79f0"
-  },
-  {
     "url": "src/images/main-image-lg.jpg",
     "revision": "31b19bffae4ea13ca0f2178ddb639403"
   },
@@ -129,6 +101,34 @@ workbox.precaching.precacheAndRoute([
   {
     "url": "src/images/sf-boat.jpg",
     "revision": "0f282d64b0fb306daf12050e812d6a19"
+  },
+  {
+    "url": "src/js/app.min.js",
+    "revision": "5fc5657df61b733b741d3815c1e22afa"
+  },
+  {
+    "url": "src/js/feed.min.js",
+    "revision": "4c10ce8965fbbc234399748a7df9f3ef"
+  },
+  {
+    "url": "src/js/fetch.min.js",
+    "revision": "32590119a06bf9ade8026dd12baa695e"
+  },
+  {
+    "url": "src/js/idb.min.js",
+    "revision": "ea82c8cec7e6574ed535bee7878216e0"
+  },
+  {
+    "url": "src/js/material.min.js",
+    "revision": "713af0c6ce93dbbce2f00bf0a98d0541"
+  },
+  {
+    "url": "src/js/promise.min.js",
+    "revision": "7be19d2e97926f498f2668e055e26b22"
+  },
+  {
+    "url": "src/js/utility.min.js",
+    "revision": "0ea6d05f57fd4e4ac742c61317e9fdc1"
   }
 ], {});
 

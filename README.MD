@@ -19,6 +19,8 @@ A PWA instagram clone 📸
 * _Background Sync_: `User can create posts when offline and have them sent to the server when they get online`
 * _Enable Notifications_: `User can enable push notifications to receive updates sent from the app server`
 * _Push Notifications_: `User can view and respond to a notification, optionally triggering an action in the app even when closed`
+* _Camera Access_: `User can enable video camera access`
+* _Location Access_: `User can enable location access (GPS coordinates)`
 
 
 ## Credits
